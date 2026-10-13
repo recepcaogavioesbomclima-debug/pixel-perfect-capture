@@ -78,7 +78,7 @@ function Inbox({ signedIn }: { signedIn: boolean }) {
   const [infoOpen, setInfoOpen] = useState(true);
   const [flashing] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
-  const view = leads.map((l) => (read[l.phone] !== undefined && l.messages.length <= read[l.phone] ? { ...l, unread: 0 } : l));
+  const view = leads.map((l) => (read[l.phone] !== undefined && l.messages.length <= (read[l.phone] ?? 0) ? { ...l, unread: 0 } : l));
   const lead = view.find((l) => l.phone === selected) ?? null;
   const select = (phone: string) => {
     setSelected(phone);

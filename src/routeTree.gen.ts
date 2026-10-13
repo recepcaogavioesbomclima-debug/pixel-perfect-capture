@@ -10,33 +10,181 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtendimentoRouteImport } from './routes/atendimento'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AutomacoesRouteImport } from './routes/automacoes'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as ExecucoesRouteImport } from './routes/execucoes'
+import { Route as InteresseRouteImport } from './routes/interesse'
+import { Route as RespostasRouteImport } from './routes/respostas'
+import { Route as AutomacoesLeadsRouteImport } from './routes/automacoes_.leads'
+import { Route as ApiPublicHooksAutomationTickRouteImport } from './routes/api/public/hooks/automation-tick'
+import { Route as ApiPublicHooksEvolutionRouteImport } from './routes/api/public/hooks/evolution'
+import { Route as ApiPublicHooksWhapiRouteImport } from './routes/api/public/hooks/whapi'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AtendimentoRoute = AtendimentoRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomacoesRoute = AutomacoesRouteImport.update({
+  id: '/automacoes',
+  path: '/automacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExecucoesRoute = ExecucoesRouteImport.update({
+  id: '/execucoes',
+  path: '/execucoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InteresseRoute = InteresseRouteImport.update({
+  id: '/interesse',
+  path: '/interesse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RespostasRoute = RespostasRouteImport.update({
+  id: '/respostas',
+  path: '/respostas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AutomacoesLeadsRoute = AutomacoesLeadsRouteImport.update({
+  id: '/automacoes_/leads',
+  path: '/automacoes/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksAutomationTickRoute =
+  ApiPublicHooksAutomationTickRouteImport.update({
+    id: '/api/public/hooks/automation-tick',
+    path: '/api/public/hooks/automation-tick',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksEvolutionRoute = ApiPublicHooksEvolutionRouteImport.update({
+  id: '/api/public/hooks/evolution',
+  path: '/api/public/hooks/evolution',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksWhapiRoute = ApiPublicHooksWhapiRouteImport.update({
+  id: '/api/public/hooks/whapi',
+  path: '/api/public/hooks/whapi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
+  '/auth': typeof AuthRoute
+  '/automacoes': typeof AutomacoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/execucoes': typeof ExecucoesRoute
+  '/interesse': typeof InteresseRoute
+  '/respostas': typeof RespostasRoute
+  '/automacoes/leads': typeof AutomacoesLeadsRoute
+  '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
+  '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
+  '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
+  '/auth': typeof AuthRoute
+  '/automacoes': typeof AutomacoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/execucoes': typeof ExecucoesRoute
+  '/interesse': typeof InteresseRoute
+  '/respostas': typeof RespostasRoute
+  '/automacoes/leads': typeof AutomacoesLeadsRoute
+  '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
+  '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
+  '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
+  '/auth': typeof AuthRoute
+  '/automacoes': typeof AutomacoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/execucoes': typeof ExecucoesRoute
+  '/interesse': typeof InteresseRoute
+  '/respostas': typeof RespostasRoute
+  '/automacoes_/leads': typeof AutomacoesLeadsRoute
+  '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
+  '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
+  '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/atendimento'
+    | '/auth'
+    | '/automacoes'
+    | '/configuracoes'
+    | '/execucoes'
+    | '/interesse'
+    | '/respostas'
+    | '/automacoes/leads'
+    | '/api/public/hooks/automation-tick'
+    | '/api/public/hooks/evolution'
+    | '/api/public/hooks/whapi'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/atendimento'
+    | '/auth'
+    | '/automacoes'
+    | '/configuracoes'
+    | '/execucoes'
+    | '/interesse'
+    | '/respostas'
+    | '/automacoes/leads'
+    | '/api/public/hooks/automation-tick'
+    | '/api/public/hooks/evolution'
+    | '/api/public/hooks/whapi'
+  id:
+    | '__root__'
+    | '/'
+    | '/atendimento'
+    | '/auth'
+    | '/automacoes'
+    | '/configuracoes'
+    | '/execucoes'
+    | '/interesse'
+    | '/respostas'
+    | '/automacoes_/leads'
+    | '/api/public/hooks/automation-tick'
+    | '/api/public/hooks/evolution'
+    | '/api/public/hooks/whapi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AtendimentoRoute: typeof AtendimentoRoute
+  AuthRoute: typeof AuthRoute
+  AutomacoesRoute: typeof AutomacoesRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ExecucoesRoute: typeof ExecucoesRoute
+  InteresseRoute: typeof InteresseRoute
+  RespostasRoute: typeof RespostasRoute
+  AutomacoesLeadsRoute: typeof AutomacoesLeadsRoute
+  ApiPublicHooksAutomationTickRoute: typeof ApiPublicHooksAutomationTickRoute
+  ApiPublicHooksEvolutionRoute: typeof ApiPublicHooksEvolutionRoute
+  ApiPublicHooksWhapiRoute: typeof ApiPublicHooksWhapiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +196,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automacoes': {
+      id: '/automacoes'
+      path: '/automacoes'
+      fullPath: '/automacoes'
+      preLoaderRoute: typeof AutomacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/execucoes': {
+      id: '/execucoes'
+      path: '/execucoes'
+      fullPath: '/execucoes'
+      preLoaderRoute: typeof ExecucoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interesse': {
+      id: '/interesse'
+      path: '/interesse'
+      fullPath: '/interesse'
+      preLoaderRoute: typeof InteresseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/respostas': {
+      id: '/respostas'
+      path: '/respostas'
+      fullPath: '/respostas'
+      preLoaderRoute: typeof RespostasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/automacoes_/leads': {
+      id: '/automacoes_/leads'
+      path: '/automacoes/leads'
+      fullPath: '/automacoes/leads'
+      preLoaderRoute: typeof AutomacoesLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/automation-tick': {
+      id: '/api/public/hooks/automation-tick'
+      path: '/api/public/hooks/automation-tick'
+      fullPath: '/api/public/hooks/automation-tick'
+      preLoaderRoute: typeof ApiPublicHooksAutomationTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/evolution': {
+      id: '/api/public/hooks/evolution'
+      path: '/api/public/hooks/evolution'
+      fullPath: '/api/public/hooks/evolution'
+      preLoaderRoute: typeof ApiPublicHooksEvolutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/whapi': {
+      id: '/api/public/hooks/whapi'
+      path: '/api/public/hooks/whapi'
+      fullPath: '/api/public/hooks/whapi'
+      preLoaderRoute: typeof ApiPublicHooksWhapiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AtendimentoRoute: AtendimentoRoute,
+  AuthRoute: AuthRoute,
+  AutomacoesRoute: AutomacoesRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ExecucoesRoute: ExecucoesRoute,
+  InteresseRoute: InteresseRoute,
+  RespostasRoute: RespostasRoute,
+  AutomacoesLeadsRoute: AutomacoesLeadsRoute,
+  ApiPublicHooksAutomationTickRoute: ApiPublicHooksAutomationTickRoute,
+  ApiPublicHooksEvolutionRoute: ApiPublicHooksEvolutionRoute,
+  ApiPublicHooksWhapiRoute: ApiPublicHooksWhapiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

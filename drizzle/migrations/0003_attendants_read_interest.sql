@@ -1,1 +1,0 @@
-CREATE POLICY "Atendentes leem interesse" ON public.lead_interest FOR SELECT TO authenticated USING (true);

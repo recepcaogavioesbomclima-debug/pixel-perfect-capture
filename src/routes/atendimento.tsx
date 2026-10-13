@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { MessageSquareText } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { ChatPanel } from "@/components/inbox/ChatPanel";
 import { LeadInfoPanel } from "@/components/inbox/LeadInfoPanel";
 import { LeadList } from "@/components/inbox/LeadList";
-import { Nav } from "@/components/Nav";
 import { supabase } from "@/integrations/supabase/client";
 import { claimConversation } from "@/lib/handoff.functions";
 import { listInbox, sendInboxMessage } from "@/lib/inbox.functions";
@@ -35,35 +34,56 @@ function Atendimento() {
     const { data } = supabase.auth.onAuthStateChange((_e, s) => setSignedIn(!!s));
     return () => data.subscription.unsubscribe();
   }, []);
-
   if (signedIn === null) return null;
-  if (!signedIn)
-    return (
-      <div className="min-h-screen bg-background">
-        <Nav />
-        <div className="mx-auto max-w-md p-10 text-center">
-          <h1 className="text-xl font-semibold">Central de Atendimento</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Entre como atendente para ver as conversas.</p>
-          <Link to="/auth" className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-            Entrar
-          </Link>
-        </div>
-      </div>
-    );
-  return <Inbox />;
+  return <Inbox signedIn={signedIn} />;
 }
 
-function Inbox() {
+function LoginInline() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  return (
+    <form
+      className="mt-2 flex w-full max-w-xs flex-col gap-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        setErr(error ? "E-mail ou senha incorretos." : null);
+      }}
+    >
+      <input className="rounded-md border border-border bg-card px-3 py-2 text-sm" placeholder="E-mail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      <input className="rounded-md border border-border bg-card px-3 py-2 text-sm" placeholder="Senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+      <button className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Acessar conversas</button>
+      {err && <p className="text-xs text-destructive">{err}</p>}
+    </form>
+  );
+}
+
+function Inbox({ signedIn }: { signedIn: boolean }) {
   const qc = useQueryClient();
   const fetchInbox = useServerFn(listInbox);
   const sendFn = useServerFn(sendInboxMessage);
   const claimFn = useServerFn(claimConversation);
-  const { data: leads = [], error } = useQuery({ queryKey: ["inbox"], queryFn: () => fetchInbox(), refetchInterval: 5000 });
+  const { data: leads = [], error } = useQuery({ queryKey: ["inbox"], queryFn: () => fetchInbox(), refetchInterval: 5000, enabled: signedIn });
+  useEffect(() => {
+    if (!signedIn) return;
+    const ch = supabase
+      .channel("inbox-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "inbound_alerts" }, () => qc.invalidateQueries({ queryKey: ["inbox"] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [signedIn, qc]);
+  const [read, setRead] = useState<Record<string, number>>({});
   const [selected, setSelected] = useState<string | null>(null);
   const [infoOpen, setInfoOpen] = useState(true);
   const [flashing] = useState<Set<string>>(new Set());
   const [notice, setNotice] = useState<string | null>(null);
-  const lead = leads.find((l) => l.phone === selected) ?? null;
+  const view = leads.map((l) => (read[l.phone] !== undefined && l.messages.length <= read[l.phone] ? { ...l, unread: 0 } : l));
+  const lead = view.find((l) => l.phone === selected) ?? null;
+  const select = (phone: string) => {
+    setSelected(phone);
+    setRead((r) => ({ ...r, [phone]: leads.find((l) => l.phone === phone)?.messages.length ?? 0 }));
+  };
 
   const patch = (phone: string, fn: (l: Lead) => Lead) =>
     qc.setQueryData<Lead[]>(["inbox"], (ls) => (ls ?? []).map((l) => (l.phone === phone ? fn(l) : l)));
@@ -89,7 +109,6 @@ function Inbox() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
-      <Nav />
       {(notice || error) && (
         <button onClick={() => setNotice(null)} className="bg-primary-soft px-4 py-2 text-left text-sm text-foreground">
           {notice ?? String((error as Error).message)}
@@ -97,7 +116,7 @@ function Inbox() {
       )}
       <div className="flex min-h-0 flex-1">
         <div className={cn("h-full w-full shrink-0 border-r border-border md:w-[340px] lg:w-[380px]", lead && "hidden md:block")}>
-          <LeadList leads={leads} selected={selected} flashing={flashing} onSelect={setSelected} />
+          <LeadList leads={view} selected={selected} flashing={flashing} onSelect={select} />
         </div>
         <main className={cn("h-full min-w-0 flex-1", !lead && "hidden md:block")}>
           {lead ? (
@@ -109,8 +128,13 @@ function Inbox() {
               </div>
               <h2 className="text-xl font-semibold">Central de Atendimento</h2>
               <p className="max-w-sm text-sm text-muted-foreground">
-                {leads.length ? "Selecione uma conversa." : "Nenhuma conversa ainda. Conecte o WhatsApp para começar a receber mensagens."}
+                {!signedIn
+                  ? "Acesse com sua conta de atendente para carregar as conversas reais."
+                  : leads.length
+                    ? "Selecione uma conversa para ver as mensagens, a temperatura e quem está atendendo o lead."
+                    : "Nenhuma conversa ainda. Conecte o WhatsApp para começar a receber mensagens."}
               </p>
+              {!signedIn && <LoginInline />}
             </div>
           )}
         </main>

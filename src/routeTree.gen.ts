@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AtendimentoRouteImport } from './routes/atendimento'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
@@ -24,6 +25,11 @@ import { Route as ApiPublicHooksWhapiRouteImport } from './routes/api/public/hoo
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AtendimentoRoute = AtendimentoRouteImport.update({
+  id: '/atendimento',
+  path: '/atendimento',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -80,6 +86,7 @@ const ApiPublicHooksWhapiRoute = ApiPublicHooksWhapiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
   '/auth': typeof AuthRoute
   '/automacoes': typeof AutomacoesRoute
   '/configuracoes': typeof ConfiguracoesRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
   '/auth': typeof AuthRoute
   '/automacoes': typeof AutomacoesRoute
   '/configuracoes': typeof ConfiguracoesRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/atendimento': typeof AtendimentoRoute
   '/auth': typeof AuthRoute
   '/automacoes': typeof AutomacoesRoute
   '/configuracoes': typeof ConfiguracoesRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/atendimento'
     | '/auth'
     | '/automacoes'
     | '/configuracoes'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/atendimento'
     | '/auth'
     | '/automacoes'
     | '/configuracoes'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/atendimento'
     | '/auth'
     | '/automacoes'
     | '/configuracoes'
@@ -162,6 +174,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AtendimentoRoute: typeof AtendimentoRoute
   AuthRoute: typeof AuthRoute
   AutomacoesRoute: typeof AutomacoesRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/atendimento': {
+      id: '/atendimento'
+      path: '/atendimento'
+      fullPath: '/atendimento'
+      preLoaderRoute: typeof AtendimentoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -258,6 +278,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AtendimentoRoute: AtendimentoRoute,
   AuthRoute: AuthRoute,
   AutomacoesRoute: AutomacoesRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,

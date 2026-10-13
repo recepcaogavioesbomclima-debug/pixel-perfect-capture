@@ -66,9 +66,8 @@ export const listInbox = createServerFn({ method: "GET" })
           direction: m.direction === "IN" ? "IN" : "OUT",
           content: m.content ?? "",
           at: m.created_at,
-          status: m.direction === "OUT" ? (m.status as MessageStatus) : undefined,
-          author: m.direction === "OUT" ? (m.execution_id ? "Automação" : "Atendente") : undefined,
-        })),
+          ...(m.direction === "OUT" ? { status: m.status as MessageStatus, author: m.execution_id ? "Automação" : "Atendente" } : {}),
+        })) as Lead["messages"],
       });
     }
     result.sort((a, b) => (b.messages.at(-1)?.at ?? b.enteredAt).localeCompare(a.messages.at(-1)?.at ?? a.enteredAt));

@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const items = [
   { to: "/", label: "WhatsApp" },
+  { to: "/atendimento", label: "Atendimento" },
   { to: "/automacoes", label: "Automações" },
   { to: "/automacoes/leads", label: "Leads em Automação" },
   { to: "/interesse", label: "Interesse" },

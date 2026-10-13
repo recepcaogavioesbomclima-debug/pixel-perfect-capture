@@ -8,3 +8,5 @@
 - [x] Alerta de nova mensagem (10s) + botão "Assumir atendimento" com login de atendente
 - [ ] Salvar tokens do WhatsApp neste projeto (WHAPI_API_TOKEN / WHAPI_WEBHOOK_TOKEN) — aguardando usuário
 - [ ] Reapontar webhook do provedor para este projeto e religar o agendador após publicar
+- [x] Unificado com o repositório do front-end: Central de Atendimento (/atendimento) ligada aos dados reais
+- [ ] Salvar WHAPI_API_TOKEN / WHAPI_WEBHOOK_TOKEN neste projeto — aguardando usuário

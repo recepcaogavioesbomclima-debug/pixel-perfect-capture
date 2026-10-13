@@ -17,3 +17,4 @@
 
 - Human handoff: claims go through the `claim_conversation`/`release_conversation` SQL functions (atomic, one attendant per phone) and set `contact_ai.paused`; the engine skips sends while `contact_ai.assigned_to` is set. Why: concurrency must be decided by the database, not the UI.
 - Inbound alerts come from a trigger on `messages` (direction IN) into `inbound_alerts`, streamed to signed-in attendants via Realtime. Why: works for every provider webhook without touching them.
+- Inbox UI (/atendimento) reads via inbox.functions.ts and sends via sendMessageIdempotent; never demo data. Why: single real backend for every screen.

@@ -43,6 +43,13 @@
       "when": 1791918570268,
       "tag": "0005_sync_imported_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791921005364,
+      "tag": "0006_sla_module",
+      "breakpoints": true
     }
   ]
 }

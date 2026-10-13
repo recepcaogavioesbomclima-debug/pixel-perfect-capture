@@ -620,6 +620,167 @@ export type Database = {
         }
         Relationships: []
       }
+      sla_cycles: {
+        Row: {
+          alert_level: number
+          attendant_at_start: string | null
+          close_reason: string | null
+          created_at: string
+          deadline_s: number
+          final_status: string | null
+          first_auto_reply_at: string | null
+          first_message_id: string
+          human_reply_at: string | null
+          human_reply_by: string | null
+          id: string
+          in_count: number
+          kind: string
+          last_in_at: string
+          lead_id: string | null
+          phone: string
+          priority: boolean
+          started_at: string
+          status: string
+          updated_at: string
+          wait_s: number | null
+        }
+        Insert: {
+          alert_level?: number
+          attendant_at_start?: string | null
+          close_reason?: string | null
+          created_at?: string
+          deadline_s: number
+          final_status?: string | null
+          first_auto_reply_at?: string | null
+          first_message_id: string
+          human_reply_at?: string | null
+          human_reply_by?: string | null
+          id?: string
+          in_count?: number
+          kind?: string
+          last_in_at: string
+          lead_id?: string | null
+          phone: string
+          priority?: boolean
+          started_at: string
+          status?: string
+          updated_at?: string
+          wait_s?: number | null
+        }
+        Update: {
+          alert_level?: number
+          attendant_at_start?: string | null
+          close_reason?: string | null
+          created_at?: string
+          deadline_s?: number
+          final_status?: string | null
+          first_auto_reply_at?: string | null
+          first_message_id?: string
+          human_reply_at?: string | null
+          human_reply_by?: string | null
+          id?: string
+          in_count?: number
+          kind?: string
+          last_in_at?: string
+          lead_id?: string | null
+          phone?: string
+          priority?: boolean
+          started_at?: string
+          status?: string
+          updated_at?: string
+          wait_s?: number | null
+        }
+        Relationships: []
+      }
+      sla_events: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          data: Json
+          event: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          data?: Json
+          event: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          data?: Json
+          event?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_events_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "sla_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sla_settings: {
+        Row: {
+          alerts_enabled: boolean
+          attendant_targets: Json
+          biz_days: number[]
+          biz_end_hour: number
+          biz_start_hour: number
+          continuous: boolean
+          critical_mult: number
+          first_response_s: number
+          id: boolean
+          ongoing_s: number
+          priority_s: number
+          target_pct: number
+          tz_offset_minutes: number
+          updated_at: string
+          warn_pct: number
+        }
+        Insert: {
+          alerts_enabled?: boolean
+          attendant_targets?: Json
+          biz_days?: number[]
+          biz_end_hour?: number
+          biz_start_hour?: number
+          continuous?: boolean
+          critical_mult?: number
+          first_response_s?: number
+          id?: boolean
+          ongoing_s?: number
+          priority_s?: number
+          target_pct?: number
+          tz_offset_minutes?: number
+          updated_at?: string
+          warn_pct?: number
+        }
+        Update: {
+          alerts_enabled?: boolean
+          attendant_targets?: Json
+          biz_days?: number[]
+          biz_end_hour?: number
+          biz_start_hour?: number
+          continuous?: boolean
+          critical_mult?: number
+          first_response_s?: number
+          id?: boolean
+          ongoing_s?: number
+          priority_s?: number
+          target_pct?: number
+          tz_offset_minutes?: number
+          updated_at?: string
+          warn_pct?: number
+        }
+        Relationships: []
+      }
       webhook_events: {
         Row: {
           created_at: string
@@ -710,6 +871,9 @@ export type Database = {
         }[]
       }
       release_conversation: { Args: { _phone: string }; Returns: boolean }
+      sla_close: { Args: { _phone: string; _reason: string }; Returns: boolean }
+      sla_elapsed: { Args: { _from: string; _to: string }; Returns: number }
+      sla_tick: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never

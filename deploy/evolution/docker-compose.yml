@@ -1,0 +1,27 @@
+# Evolution API v2 + Postgres + Redis — rode em uma VPS com Docker.
+# 1) copie .env.example para .env e troque AUTHENTICATION_API_KEY e SERVER_URL
+# 2) docker compose up -d
+services:
+  evolution:
+    image: atendai/evolution-api:v2.2.3
+    restart: always
+    ports: ["8080:8080"]
+    env_file: .env
+    volumes: [evolution_instances:/evolution/instances]
+    depends_on: [postgres, redis]
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution
+      POSTGRES_DB: evolution
+    volumes: [pg_data:/var/lib/postgresql/data]
+  redis:
+    image: redis:7
+    restart: always
+    volumes: [redis_data:/data]
+volumes:
+  evolution_instances:
+  pg_data:
+  redis_data:

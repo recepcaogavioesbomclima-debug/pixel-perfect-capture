@@ -17,6 +17,7 @@ import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ExecucoesRouteImport } from './routes/execucoes'
 import { Route as InteresseRouteImport } from './routes/interesse'
 import { Route as RespostasRouteImport } from './routes/respostas'
+import { Route as SlaRouteImport } from './routes/sla'
 import { Route as AutomacoesLeadsRouteImport } from './routes/automacoes_.leads'
 import { Route as ApiPublicHooksAutomationTickRouteImport } from './routes/api/public/hooks/automation-tick'
 import { Route as ApiPublicHooksEvolutionRouteImport } from './routes/api/public/hooks/evolution'
@@ -62,6 +63,11 @@ const RespostasRoute = RespostasRouteImport.update({
   path: '/respostas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SlaRoute = SlaRouteImport.update({
+  id: '/sla',
+  path: '/sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AutomacoesLeadsRoute = AutomacoesLeadsRouteImport.update({
   id: '/automacoes_/leads',
   path: '/automacoes/leads',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
   '/respostas': typeof RespostasRoute
+  '/sla': typeof SlaRoute
   '/automacoes/leads': typeof AutomacoesLeadsRoute
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
   '/respostas': typeof RespostasRoute
+  '/sla': typeof SlaRoute
   '/automacoes/leads': typeof AutomacoesLeadsRoute
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
   '/respostas': typeof RespostasRoute
+  '/sla': typeof SlaRoute
   '/automacoes_/leads': typeof AutomacoesLeadsRoute
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/execucoes'
     | '/interesse'
     | '/respostas'
+    | '/sla'
     | '/automacoes/leads'
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/execucoes'
     | '/interesse'
     | '/respostas'
+    | '/sla'
     | '/automacoes/leads'
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
@@ -166,6 +177,7 @@ export interface FileRouteTypes {
     | '/execucoes'
     | '/interesse'
     | '/respostas'
+    | '/sla'
     | '/automacoes_/leads'
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
@@ -181,6 +193,7 @@ export interface RootRouteChildren {
   ExecucoesRoute: typeof ExecucoesRoute
   InteresseRoute: typeof InteresseRoute
   RespostasRoute: typeof RespostasRoute
+  SlaRoute: typeof SlaRoute
   AutomacoesLeadsRoute: typeof AutomacoesLeadsRoute
   ApiPublicHooksAutomationTickRoute: typeof ApiPublicHooksAutomationTickRoute
   ApiPublicHooksEvolutionRoute: typeof ApiPublicHooksEvolutionRoute
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RespostasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sla': {
+      id: '/sla'
+      path: '/sla'
+      fullPath: '/sla'
+      preLoaderRoute: typeof SlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/automacoes_/leads': {
       id: '/automacoes_/leads'
       path: '/automacoes/leads'
@@ -285,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExecucoesRoute: ExecucoesRoute,
   InteresseRoute: InteresseRoute,
   RespostasRoute: RespostasRoute,
+  SlaRoute: SlaRoute,
   AutomacoesLeadsRoute: AutomacoesLeadsRoute,
   ApiPublicHooksAutomationTickRoute: ApiPublicHooksAutomationTickRoute,
   ApiPublicHooksEvolutionRoute: ApiPublicHooksEvolutionRoute,

@@ -106,7 +106,7 @@ function Dashboard() {
               const lvl = alertLevel(s, e, c.deadline_s);
               return (
                 <li key={c.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL[lvl].cls}`}>{LEVEL[lvl].label}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${LEVEL[lvl]!.cls}`}>{LEVEL[lvl]!.label}</span>
                   <span className="font-medium">{name(c.phone)}</span>
                   <span className="text-muted-foreground">{c.priority ? "🔥 prioridade" : c.kind === "FIRST" ? "1º contato" : "em andamento"} · {c.in_count} msg</span>
                   <span className="ml-auto tabular-nums">{fmtDuration(e)} / {fmtDuration(c.deadline_s)}</span>

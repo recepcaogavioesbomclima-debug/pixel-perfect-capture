@@ -10,3 +10,4 @@
 - [ ] Reapontar webhook do provedor para este projeto e religar o agendador após publicar
 - [x] Unificado com o repositório do front-end: Central de Atendimento (/atendimento) ligada aos dados reais
 - [ ] Salvar WHAPI_API_TOKEN / WHAPI_WEBHOOK_TOKEN neste projeto — aguardando usuário
+- [x] Controle de prazos (SLA): tela /sla com painel, configuração e testes

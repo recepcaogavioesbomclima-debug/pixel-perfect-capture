@@ -23,6 +23,7 @@ export const Route = createFileRoute("/api/public/hooks/automation-tick")({
         if (!authorized) return new Response("unauthorized", { status: 401 });
 
         const result = await runDueExecutions();
+        await (getDb() as any).rpc("sla_tick");
         return Response.json(result);
       },
     },

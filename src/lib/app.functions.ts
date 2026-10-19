@@ -102,7 +102,7 @@ export const registerWebhook = createServerFn({ method: "POST" })
     // Endereco fixo DESTE projeto (o antigo apontava para outro projeto e as mensagens nunca chegavam).
     // O endereco de preview com login bloqueia o provedor, por isso nao usamos data.origin.
     void data;
-    const PUBLIC_ORIGIN = "https://project--ef5509e9-687b-4626-a073-84ee5655d9ec-dev.lovable.app";
+    const PUBLIC_ORIGIN = "https://project--77f782c8-f988-4460-926c-43834c0925c2.lovable.app";
     const url = `${PUBLIC_ORIGIN}/api/public/hooks/${hook}?token=${token}`;
     try {
       await WhatsAppProvider.setWebhook(url);

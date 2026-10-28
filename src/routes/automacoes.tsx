@@ -279,6 +279,7 @@ function Page() {
             >
               {saveMutation.isPending ? "Salvando..." : "Salvar automação"}
             </button>
+            {notice ? <span className="self-center text-sm text-muted-foreground">{notice}</span> : null}
             {editingId ? (
               <button
                 className="rounded-md border border-input px-3 py-2 text-sm hover:bg-accent"
@@ -294,6 +295,40 @@ function Page() {
           </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+const UNITS = [
+  { label: "segundos", mult: 1 },
+  { label: "minutos", mult: 60 },
+  { label: "horas", mult: 3600 },
+];
+
+function WaitInput({ seconds, onChange }: { seconds: number; onChange: (s: number) => void }) {
+  const best = seconds % 3600 === 0 ? 3600 : seconds % 60 === 0 ? 60 : 1;
+  const [mult, setMult] = useState(best);
+  const value = seconds / mult;
+  return (
+    <div className="mt-3 flex items-center gap-2 text-sm">
+      <input
+        type="number"
+        min={1}
+        step="any"
+        value={Number.isInteger(value) ? value : Number(value.toFixed(2))}
+        onChange={(e) => onChange(Math.max(1, Math.round(Number(e.target.value) * mult)))}
+        className="w-28 rounded-md border border-input bg-background px-3 py-2"
+      />
+      <select
+        value={mult}
+        onChange={(e) => setMult(Number(e.target.value))}
+        className="rounded-md border border-input bg-background px-2 py-2"
+      >
+        {UNITS.map((u) => (
+          <option key={u.mult} value={u.mult}>{u.label}</option>
+        ))}
+      </select>
+      <span className="text-muted-foreground">de espera ({seconds}s)</span>
     </div>
   );
 }

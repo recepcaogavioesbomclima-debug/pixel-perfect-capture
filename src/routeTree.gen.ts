@@ -22,6 +22,7 @@ import { Route as AutomacoesLeadsRouteImport } from './routes/automacoes_.leads'
 import { Route as ApiPublicHooksAutomationTickRouteImport } from './routes/api/public/hooks/automation-tick'
 import { Route as ApiPublicHooksEvolutionRouteImport } from './routes/api/public/hooks/evolution'
 import { Route as ApiPublicHooksWhapiRouteImport } from './routes/api/public/hooks/whapi'
+import { Route as ApiPublicJobsAutomationWorkerRouteImport } from './routes/api/public/jobs/automation-worker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -89,6 +90,12 @@ const ApiPublicHooksWhapiRoute = ApiPublicHooksWhapiRouteImport.update({
   path: '/api/public/hooks/whapi',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicJobsAutomationWorkerRoute =
+  ApiPublicJobsAutomationWorkerRouteImport.update({
+    id: '/api/public/jobs/automation-worker',
+    path: '/api/public/jobs/automation-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
   '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
+  '/api/public/jobs/automation-worker': typeof ApiPublicJobsAutomationWorkerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -119,6 +127,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
   '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
+  '/api/public/jobs/automation-worker': typeof ApiPublicJobsAutomationWorkerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,6 +144,7 @@ export interface FileRoutesById {
   '/api/public/hooks/automation-tick': typeof ApiPublicHooksAutomationTickRoute
   '/api/public/hooks/evolution': typeof ApiPublicHooksEvolutionRoute
   '/api/public/hooks/whapi': typeof ApiPublicHooksWhapiRoute
+  '/api/public/jobs/automation-worker': typeof ApiPublicJobsAutomationWorkerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
     | '/api/public/hooks/whapi'
+    | '/api/public/jobs/automation-worker'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -167,6 +178,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
     | '/api/public/hooks/whapi'
+    | '/api/public/jobs/automation-worker'
   id:
     | '__root__'
     | '/'
@@ -182,6 +194,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/automation-tick'
     | '/api/public/hooks/evolution'
     | '/api/public/hooks/whapi'
+    | '/api/public/jobs/automation-worker'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -198,6 +211,7 @@ export interface RootRouteChildren {
   ApiPublicHooksAutomationTickRoute: typeof ApiPublicHooksAutomationTickRoute
   ApiPublicHooksEvolutionRoute: typeof ApiPublicHooksEvolutionRoute
   ApiPublicHooksWhapiRoute: typeof ApiPublicHooksWhapiRoute
+  ApiPublicJobsAutomationWorkerRoute: typeof ApiPublicJobsAutomationWorkerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -293,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksWhapiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/jobs/automation-worker': {
+      id: '/api/public/jobs/automation-worker'
+      path: '/api/public/jobs/automation-worker'
+      fullPath: '/api/public/jobs/automation-worker'
+      preLoaderRoute: typeof ApiPublicJobsAutomationWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -310,6 +331,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksAutomationTickRoute: ApiPublicHooksAutomationTickRoute,
   ApiPublicHooksEvolutionRoute: ApiPublicHooksEvolutionRoute,
   ApiPublicHooksWhapiRoute: ApiPublicHooksWhapiRoute,
+  ApiPublicJobsAutomationWorkerRoute: ApiPublicJobsAutomationWorkerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

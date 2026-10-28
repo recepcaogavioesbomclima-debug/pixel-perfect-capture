@@ -147,12 +147,20 @@ export const saveAutomation = createServerFn({ method: "POST" })
     const { getDb, log } = await import("./db.server");
     const db = getDb();
     let automationId = data.id;
+    // Tempo de espera sempre em segundos inteiros (unidade única do motor).
+    const steps = data.steps.map((step) =>
+      step.type === "WAIT"
+        ? { ...step, config: { ...step.config, seconds: Math.max(1, Math.round(Number(step.config?.["seconds"]) || 0)) } }
+        : step,
+    );
     if (automationId) {
-      await db
+      const { error: upErr } = await db
         .from("automations")
         .update({ name: data.name, status: data.status, updated_at: new Date().toISOString() })
         .eq("id", automationId);
-      await db.from("automation_steps").delete().eq("automation_id", automationId);
+      if (upErr) throw upErr;
+      const { error: delErr } = await db.from("automation_steps").delete().eq("automation_id", automationId);
+      if (delErr) throw delErr;
     } else {
       const { data: created, error } = await db
         .from("automations")
@@ -162,9 +170,9 @@ export const saveAutomation = createServerFn({ method: "POST" })
       if (error) throw error;
       automationId = created.id;
     }
-    if (data.steps.length) {
+    if (steps.length) {
       const { error } = await db.from("automation_steps").insert(
-        data.steps.map((step, index) => ({
+        steps.map((step, index) => ({
           automation_id: automationId!,
           order_index: index,
           type: step.type,
@@ -173,8 +181,40 @@ export const saveAutomation = createServerFn({ method: "POST" })
       );
       if (error) throw error;
     }
-    await log("AUTOMATION_SAVED", "OK", { automationId, steps: data.steps.length });
-    return { id: automationId! };
+
+    // Execuções já esperando: recalcula o próximo envio com o novo tempo,
+    // contado a partir do momento em que a espera começou.
+    let rescheduled = 0;
+    const { data: waiting } = await db
+      .from("automation_executions")
+      .select("id, current_step")
+      .eq("automation_id", automationId!)
+      .eq("status", "WAITING");
+    for (const ex of waiting ?? []) {
+      const prev = steps[ex.current_step - 1];
+      if (!prev || prev.type !== "WAIT") continue;
+      const { data: lg } = await db
+        .from("automation_logs")
+        .select("created_at")
+        .eq("execution_id", ex.id)
+        .eq("event", "WAIT_SCHEDULED")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!lg) continue;
+      const seconds = Number(prev.config["seconds"]);
+      const next = new Date(new Date(lg.created_at).getTime() + seconds * 1000).toISOString();
+      await db
+        .from("automation_executions")
+        .update({ next_run_at: next, updated_at: new Date().toISOString() })
+        .eq("id", ex.id)
+        .eq("status", "WAITING");
+      await log("WAIT_RESCHEDULED", "OK", { seconds, nextRunAt: next }, ex.id);
+      rescheduled++;
+    }
+
+    await log("AUTOMATION_SAVED", "OK", { automationId, steps: steps.length, rescheduled });
+    return { id: automationId!, rescheduled };
   });
 
 export const deleteAutomation = createServerFn({ method: "POST" })

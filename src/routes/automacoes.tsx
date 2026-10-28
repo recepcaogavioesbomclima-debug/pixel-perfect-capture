@@ -57,13 +57,18 @@ function Page() {
   const [status, setStatus] = useState("ACTIVE");
   const [steps, setSteps] = useState<Step[]>(DEFAULT_STEPS);
 
+  const [notice, setNotice] = useState<string | null>(null);
   const saveMutation = useMutation({
     mutationFn: () =>
       saveFn({ data: { ...(editingId ? { id: editingId } : {}), name, status, steps } }),
-    onSuccess: () => {
-      setEditingId(null);
-      queryClient.invalidateQueries({ queryKey: ["automations"] });
+    onSuccess: async (res) => {
+      setEditingId(res.id);
+      setNotice(
+        `Salvo.${res.rescheduled ? ` ${res.rescheduled} lead(s) em espera tiveram o próximo envio recalculado.` : ""}`,
+      );
+      await queryClient.invalidateQueries({ queryKey: ["automations"] });
     },
+    onError: (e) => setNotice(`Não foi possível salvar: ${(e as Error).message}`),
   });
 
   const deleteMutation = useMutation({
@@ -211,20 +216,10 @@ function Page() {
                 ) : null}
 
                 {step.type === "WAIT" ? (
-                  <div className="mt-3 flex items-center gap-2 text-sm">
-                    <input
-                      type="number"
-                      min={1}
-                      value={Math.round((step.config["seconds"] ?? 3600) / 60)}
-                      onChange={(event) =>
-                        updateStep(index, {
-                          config: { ...step.config, seconds: Number(event.target.value) * 60 },
-                        })
-                      }
-                      className="w-28 rounded-md border border-input bg-background px-3 py-2"
-                    />
-                    <span className="text-muted-foreground">minutos de espera</span>
-                  </div>
+                  <WaitInput
+                    seconds={Number(step.config["seconds"] ?? 3600)}
+                    onChange={(seconds) => updateStep(index, { config: { ...step.config, seconds } })}
+                  />
                 ) : null}
 
                 {step.type === "CHECK_CONDITION" ? (

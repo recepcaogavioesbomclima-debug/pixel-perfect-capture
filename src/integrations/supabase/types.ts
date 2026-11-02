@@ -237,6 +237,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_commercial: {
+        Row: {
+          converted: boolean
+          manual_followup_at: string | null
+          opt_out: boolean
+          pending_task: boolean
+          phone: string
+          plan_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          converted?: boolean
+          manual_followup_at?: string | null
+          opt_out?: boolean
+          pending_task?: boolean
+          phone: string
+          plan_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          converted?: boolean
+          manual_followup_at?: string | null
+          opt_out?: boolean
+          pending_task?: boolean
+          phone?: string
+          plan_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       evolution_config: {
         Row: {
           api_key: string
@@ -593,6 +623,202 @@ export type Database = {
         }
         Relationships: []
       }
+      reactivation_audit: {
+        Row: {
+          action: string
+          actor: string | null
+          campaign_id: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          item_id: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          item_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactivation_audit_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "reactivation_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reactivation_audit_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "reactivation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reactivation_campaigns: {
+        Row: {
+          authorized_at: string | null
+          authorized_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          interval_seconds: number
+          lease_token: string | null
+          lease_until: string | null
+          next_at: string
+          pause_reason: string | null
+          reference_date: string
+          status: string
+        }
+        Insert: {
+          authorized_at?: string | null
+          authorized_by?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          interval_seconds?: number
+          lease_token?: string | null
+          lease_until?: string | null
+          next_at?: string
+          pause_reason?: string | null
+          reference_date: string
+          status?: string
+        }
+        Update: {
+          authorized_at?: string | null
+          authorized_by?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          interval_seconds?: number
+          lease_token?: string | null
+          lease_until?: string | null
+          next_at?: string
+          pause_reason?: string | null
+          reference_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      reactivation_deliveries: {
+        Row: {
+          item_id: string
+          phone: string
+          reserved_at: string
+          sent_at: string | null
+        }
+        Insert: {
+          item_id: string
+          phone: string
+          reserved_at?: string
+          sent_at?: string | null
+        }
+        Update: {
+          item_id?: string
+          phone?: string
+          reserved_at?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactivation_deliveries_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "reactivation_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reactivation_items: {
+        Row: {
+          analyzed_at: string | null
+          campaign_id: string
+          confidence: number | null
+          decision: string
+          error: string | null
+          evidence: Json
+          id: string
+          last_message_id: string | null
+          message: string | null
+          name: string | null
+          phone: string
+          provider_message_id: string | null
+          reason: string | null
+          review_action: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sent_at: string | null
+          snapshot: Json
+          stage: string | null
+          status: string
+        }
+        Insert: {
+          analyzed_at?: string | null
+          campaign_id: string
+          confidence?: number | null
+          decision?: string
+          error?: string | null
+          evidence?: Json
+          id?: string
+          last_message_id?: string | null
+          message?: string | null
+          name?: string | null
+          phone: string
+          provider_message_id?: string | null
+          reason?: string | null
+          review_action?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sent_at?: string | null
+          snapshot?: Json
+          stage?: string | null
+          status?: string
+        }
+        Update: {
+          analyzed_at?: string | null
+          campaign_id?: string
+          confidence?: number | null
+          decision?: string
+          error?: string | null
+          evidence?: Json
+          id?: string
+          last_message_id?: string | null
+          message?: string | null
+          name?: string | null
+          phone?: string
+          provider_message_id?: string | null
+          reason?: string | null
+          review_action?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sent_at?: string | null
+          snapshot?: Json
+          stage?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reactivation_items_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "reactivation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       send_window: {
         Row: {
           days: number[]
@@ -869,6 +1095,49 @@ export type Database = {
           assigned_to: string
           ok: boolean
         }[]
+      }
+      reactivation_block: {
+        Args: { _last?: string; _phone: string }
+        Returns: string
+      }
+      reactivation_claim: {
+        Args: { _token: string }
+        Returns: {
+          authorized_at: string | null
+          authorized_by: string | null
+          created_at: string
+          created_by: string
+          id: string
+          interval_seconds: number
+          lease_token: string | null
+          lease_until: string | null
+          next_at: string
+          pause_reason: string | null
+          reference_date: string
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reactivation_campaigns"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      reactivation_control: {
+        Args: { _action: string; _id: string }
+        Returns: boolean
+      }
+      reactivation_create: {
+        Args: { _date: string; _interval: number }
+        Returns: string
+      }
+      reactivation_reserve: {
+        Args: { _item: string; _token: string }
+        Returns: string
+      }
+      reactivation_review: {
+        Args: { _item: string; _message: string; _send: boolean }
+        Returns: boolean
       }
       release_conversation: { Args: { _phone: string }; Returns: boolean }
       sla_close: { Args: { _phone: string; _reason: string }; Returns: boolean }

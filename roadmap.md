@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Motor de reativação: análise contextual, proteção de contatos, revisão, envio autorizado e testes
 - [x] Código importado do GitHub + banco criado
 - [x] Score Inteligente de Interesse (análise, histórico, tendência, lead quente, tela Interesse, testes)
 - [x] Agendador do motor (a cada minuto) — funciona após publicar

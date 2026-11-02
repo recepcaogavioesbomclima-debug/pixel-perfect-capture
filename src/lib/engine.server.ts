@@ -38,7 +38,7 @@ async function isHumanHandling(phone: string): Promise<boolean> {
 }
 
 /** Janela de horario permitido. Retorna null se pode enviar agora. */
-async function nextAllowedTime(now = new Date()): Promise<Date | null> {
+export async function nextAllowedTime(now = new Date()): Promise<Date | null> {
   const db = getDb();
   const { data } = await db.from("send_window").select("*").eq("id", true).maybeSingle();
   if (!data) return null;

@@ -1,6 +1,6 @@
 /** Regras puras do Score Inteligente de Interesse (sem acesso a banco/IA). */
 
-export const LOGIC_VERSION = "v1";
+export const LOGIC_VERSION = "v2";
 
 export const INTENTS = [
   "CURIOSIDADE",
@@ -38,6 +38,7 @@ export interface Analysis {
   intent: (typeof INTENTS)[number];
   objection: (typeof OBJECTIONS)[number];
   reasons: Reason[];
+  confidence: number;
 }
 
 export function levelFor(score: number): string {
@@ -86,7 +87,9 @@ export function validateAnalysis(raw: unknown): Analysis | null {
           evidence: typeof x.evidence === "string" && x.evidence.trim() ? String(x.evidence).slice(0, 300) : null,
         }))
     : [];
+  const c = Number((r as any).confidence);
   return {
+    confidence: Number.isFinite(c) ? Math.min(100, Math.max(0, Math.round(c))) : 50,
     score,
     intent,
     objection,
@@ -99,4 +102,15 @@ export function smoothScore(previous: number | null, next: number, intent: strin
   if (previous == null || intent === "SEM INTERESSE") return next;
   const maxStep = 40;
   return Math.min(previous + maxStep, Math.max(previous - maxStep, next));
+}
+
+/**
+ * Preserva o interesse anterior: cortesia ("obrigado", "vou pensar") ou analise
+ * de baixa confianca nunca derrubam o nivel; so desinteresse explicito ou
+ * assunto nao comercial com confianca alta reduzem bastante.
+ */
+export function finalScore(previous: number | null, next: number, intent: string, confidence: number) {
+  if (previous == null) return next;
+  if (confidence < 60 && next < previous) return previous;
+  return smoothScore(previous, next, intent);
 }

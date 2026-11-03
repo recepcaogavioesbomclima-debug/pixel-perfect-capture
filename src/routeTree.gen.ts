@@ -16,6 +16,7 @@ import { Route as AutomacoesRouteImport } from './routes/automacoes'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ExecucoesRouteImport } from './routes/execucoes'
 import { Route as InteresseRouteImport } from './routes/interesse'
+import { Route as ReativacaoRouteImport } from './routes/reativacao'
 import { Route as RespostasRouteImport } from './routes/respostas'
 import { Route as SlaRouteImport } from './routes/sla'
 import { Route as AutomacoesLeadsRouteImport } from './routes/automacoes_.leads'
@@ -57,6 +58,11 @@ const ExecucoesRoute = ExecucoesRouteImport.update({
 const InteresseRoute = InteresseRouteImport.update({
   id: '/interesse',
   path: '/interesse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReativacaoRoute = ReativacaoRouteImport.update({
+  id: '/reativacao',
+  path: '/reativacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RespostasRoute = RespostasRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/configuracoes': typeof ConfiguracoesRoute
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
+  '/reativacao': typeof ReativacaoRoute
   '/respostas': typeof RespostasRoute
   '/sla': typeof SlaRoute
   '/automacoes/leads': typeof AutomacoesLeadsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/configuracoes': typeof ConfiguracoesRoute
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
+  '/reativacao': typeof ReativacaoRoute
   '/respostas': typeof RespostasRoute
   '/sla': typeof SlaRoute
   '/automacoes/leads': typeof AutomacoesLeadsRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/configuracoes': typeof ConfiguracoesRoute
   '/execucoes': typeof ExecucoesRoute
   '/interesse': typeof InteresseRoute
+  '/reativacao': typeof ReativacaoRoute
   '/respostas': typeof RespostasRoute
   '/sla': typeof SlaRoute
   '/automacoes_/leads': typeof AutomacoesLeadsRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/execucoes'
     | '/interesse'
+    | '/reativacao'
     | '/respostas'
     | '/sla'
     | '/automacoes/leads'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/execucoes'
     | '/interesse'
+    | '/reativacao'
     | '/respostas'
     | '/sla'
     | '/automacoes/leads'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/configuracoes'
     | '/execucoes'
     | '/interesse'
+    | '/reativacao'
     | '/respostas'
     | '/sla'
     | '/automacoes_/leads'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ExecucoesRoute: typeof ExecucoesRoute
   InteresseRoute: typeof InteresseRoute
+  ReativacaoRoute: typeof ReativacaoRoute
   RespostasRoute: typeof RespostasRoute
   SlaRoute: typeof SlaRoute
   AutomacoesLeadsRoute: typeof AutomacoesLeadsRoute
@@ -263,6 +276,13 @@ declare module '@tanstack/react-router' {
       path: '/interesse'
       fullPath: '/interesse'
       preLoaderRoute: typeof InteresseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reativacao': {
+      id: '/reativacao'
+      path: '/reativacao'
+      fullPath: '/reativacao'
+      preLoaderRoute: typeof ReativacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/respostas': {
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfiguracoesRoute: ConfiguracoesRoute,
   ExecucoesRoute: ExecucoesRoute,
   InteresseRoute: InteresseRoute,
+  ReativacaoRoute: ReativacaoRoute,
   RespostasRoute: RespostasRoute,
   SlaRoute: SlaRoute,
   AutomacoesLeadsRoute: AutomacoesLeadsRoute,

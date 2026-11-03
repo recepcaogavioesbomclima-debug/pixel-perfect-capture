@@ -450,6 +450,7 @@ export type Database = {
         Row: {
           analyzed_at: string | null
           chat_id: string | null
+          confidence: number | null
           hot: boolean
           intent: string
           last_error: string | null
@@ -460,6 +461,7 @@ export type Database = {
           objection: string | null
           pending_at: string | null
           phone: string
+          previous_level: string | null
           previous_score: number | null
           reasons: Json
           score: number
@@ -469,6 +471,7 @@ export type Database = {
         Insert: {
           analyzed_at?: string | null
           chat_id?: string | null
+          confidence?: number | null
           hot?: boolean
           intent?: string
           last_error?: string | null
@@ -479,6 +482,7 @@ export type Database = {
           objection?: string | null
           pending_at?: string | null
           phone: string
+          previous_level?: string | null
           previous_score?: number | null
           reasons?: Json
           score?: number
@@ -488,6 +492,7 @@ export type Database = {
         Update: {
           analyzed_at?: string | null
           chat_id?: string | null
+          confidence?: number | null
           hot?: boolean
           intent?: string
           last_error?: string | null
@@ -498,6 +503,7 @@ export type Database = {
           objection?: string | null
           pending_at?: string | null
           phone?: string
+          previous_level?: string | null
           previous_score?: number | null
           reasons?: Json
           score?: number
@@ -508,6 +514,7 @@ export type Database = {
       }
       lead_interest_history: {
         Row: {
+          confidence: number | null
           created_at: string
           hot: boolean
           id: string
@@ -516,6 +523,7 @@ export type Database = {
           logic_version: string
           objection: string | null
           phone: string
+          previous_level: string | null
           previous_score: number | null
           reason: string | null
           reasons: Json
@@ -524,6 +532,7 @@ export type Database = {
           trend: string
         }
         Insert: {
+          confidence?: number | null
           created_at?: string
           hot?: boolean
           id?: string
@@ -532,6 +541,7 @@ export type Database = {
           logic_version?: string
           objection?: string | null
           phone: string
+          previous_level?: string | null
           previous_score?: number | null
           reason?: string | null
           reasons?: Json
@@ -540,6 +550,7 @@ export type Database = {
           trend?: string
         }
         Update: {
+          confidence?: number | null
           created_at?: string
           hot?: boolean
           id?: string
@@ -548,6 +559,7 @@ export type Database = {
           logic_version?: string
           objection?: string | null
           phone?: string
+          previous_level?: string | null
           previous_score?: number | null
           reason?: string | null
           reasons?: Json

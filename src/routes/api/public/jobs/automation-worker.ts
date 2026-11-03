@@ -13,7 +13,20 @@ export const Route = createFileRoute("/api/public/jobs/automation-worker")({
         const { getDb } = await import("@/lib/db.server");
         const result = await runDueExecutions(50);
         await (getDb() as any).rpc("sla_tick");
-        return Response.json(result);
+        // Reativação: processa alguns itens por minuto, sem afetar a automação se falhar.
+        let reactivated = 0;
+        try {
+          const { runReactivationWorker } = await import("@/lib/reactivation.server");
+          const stop = Date.now() + 40_000;
+          while (Date.now() < stop) {
+            const r = await runReactivationWorker();
+            if (!r.processed) break;
+            reactivated += r.processed;
+          }
+        } catch (e) {
+          console.error("[REACTIVATION]", e);
+        }
+        return Response.json({ ...result, reactivated });
       },
     },
   },

@@ -81,7 +81,7 @@ export async function runReactivationWorker() {
         if(info.error) throw info.error;
         const interest=await db.from('lead_interest').select('score,level,intent,objection').eq('phone',item.phone).maybeSingle();
         const business=`${info.data?.content??''}${interest.data?`\nInteresse atual do lead (referência, não substitui o histórico): ${interest.data.score}/100 ${interest.data.level}, intenção ${interest.data.intent}${interest.data.objection?`, objeção ${interest.data.objection}`:''}`:''}`;
-        const d=complete && history.some(m=>m.direction==='IN')?await analyzeReactivation(history,item.name,info.data?.content??''):{decision:'REVIEW' as const,confidence:0,reason:complete?'Sem mensagens do cliente para avaliar':'Histórico excede o limite seguro: revisão integral necessária',stage:'Indefinido',evidence:[],message:''};
+        const d=complete && history.some(m=>m.direction==='IN')?await analyzeReactivation(history,item.name,business):{decision:'REVIEW' as const,confidence:0,reason:complete?'Sem mensagens do cliente para avaliar':'Histórico excede o limite seguro: revisão integral necessária',stage:'Indefinido',evidence:[],message:''};
         if(d.decision==='OPT_OUT' || d.decision==='CONVERTED') {
           const protectedResult=await db.from('contact_commercial').upsert({phone:item.phone,...(d.decision==='OPT_OUT'?{opt_out:true}:{converted:true}),updated_at:new Date().toISOString()});
           if(protectedResult.error) throw protectedResult.error;

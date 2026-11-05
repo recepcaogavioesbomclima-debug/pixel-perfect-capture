@@ -312,6 +312,8 @@ export async function runPendingReplies(limit = 10) {
 
     try {
       await log("AUTO_REPLY_ANALYSING", "RUNNING", { phone: row.phone }, row.id);
+      const { data: pre } = await (db as any).from("contact_ai").select("pause_epoch").eq("phone", row.phone).maybeSingle();
+      const epoch = Number(pre?.pause_epoch ?? 0);
       let decision;
       try {
         decision = await decideReply(row.phone);
@@ -330,7 +332,10 @@ export async function runPendingReplies(limit = 10) {
         // 1 resposta por mensagem recebida, mesmo com varias execucoes do mesmo numero
         idempotencyKey: `inbound-reply:${lastIn.id}`,
         executionId: row.id,
+        sender: "AI",
+        expectEpoch: epoch,
       });
+      if (sent.blocked) continue;
       await log("AUTO_REPLY_SENT", "OK", { intent: decision.intent, reply: decision.reply, providerMessageId: sent.providerMessageId, needsHuman: decision.needsHuman }, row.id);
       replied += 1;
       if (decision.optOut) {

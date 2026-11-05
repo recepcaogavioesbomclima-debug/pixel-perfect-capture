@@ -363,9 +363,31 @@ export async function sendMessageIdempotent(params: {
   content: string;
   idempotencyKey: string;
   executionId?: string | null;
-}): Promise<{ skipped: boolean; providerMessageId?: string; providerResponse?: unknown }> {
+  /** AI/AUTOMATION passam pela trava de atendimento humano antes do envio. */
+  sender?: "AI" | "AUTOMATION" | "ATTENDANT";
+  expectEpoch?: number;
+}): Promise<{ skipped: boolean; blocked?: string; providerMessageId?: string; providerResponse?: unknown }> {
   const db = getDb();
   const phone = normalizePhone(params.phone);
+  const sender = params.sender ?? (params.executionId ? "AUTOMATION" : "ATTENDANT");
+  const automatic = sender !== "ATTENDANT";
+  const guard = async () => {
+    if (!automatic) return null;
+    const [{ data: c }, { data: cc }] = await Promise.all([
+      (db as any).from("contact_ai").select("paused, assigned_to, pause_epoch").eq("phone", phone).maybeSingle(),
+      (db as any).from("contact_commercial").select("opt_out").eq("phone", phone).maybeSingle(),
+    ]);
+    const { autoSendBlockReason } = await import("./ai-guard");
+    return autoSendBlockReason({ ...(c ?? {}), opt_out: cc?.opt_out }, params.expectEpoch);
+  };
+  const block = async (reason: string) => {
+    await (db as any).from("messages").update({ status: "CANCELLED", error: `Bloqueada: ${reason}` }).eq("idempotency_key", params.idempotencyKey).neq("status", "SENT");
+    await (db as any).from("ai_events").insert({ phone, action: "SEND_BLOCKED", actor: sender, reason, data: { key: params.idempotencyKey } });
+    await log("SEND_BLOCKED_HUMAN", "OK", { phone, reason, key: params.idempotencyKey }, params.executionId);
+    return { skipped: true, blocked: reason };
+  };
+  const early = await guard();
+  if (early) return block(early);
 
   const { data: existing } = await db
     .from("messages")
@@ -387,14 +409,20 @@ export async function sendMessageIdempotent(params: {
       status: "PENDING",
       idempotency_key: params.idempotencyKey,
       execution_id: params.executionId ?? null,
-    });
+      sender,
+    } as never);
     // corrida: outro worker ja inseriu a mesma chave
     if (error && !`${error.message}`.includes("duplicate")) throw error;
     if (error) return { skipped: true };
   }
 
+  // verificação final imediatamente antes do provedor
+  const late = await guard();
+  if (late) return block(late);
+
   try {
     const result = await WhatsAppProvider.sendMessage(phone, params.content);
+    if (sender === "AI") await (db as any).from("ai_events").insert({ phone, action: "AI_SENT", actor: "IA", reason: null, data: { providerMessageId: result.providerMessageId } });
     await db
       .from("messages")
       .update({

@@ -197,7 +197,6 @@ async function scheduleGlobalReply(phone: string, content: string) {
   const delay = Math.max(5, Number(cfg.min_interval_seconds) || 5) * 1000;
   await db.from("contact_ai").upsert({
     phone,
-    paused: false,
     pending_reply_at: new Date(Date.now() + delay).toISOString(),
     updated_at: new Date().toISOString(),
   });
@@ -231,9 +230,16 @@ async function runGlobalReplies(limit = 10) {
       .from("messages").select("id").eq("phone", row.phone).eq("direction", "IN")
       .order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!lastIn) continue;
+    const { data: pre } = await db.from("contact_ai").select("pause_epoch, paused").eq("phone", row.phone).maybeSingle();
+    if (pre?.paused) continue;
+    const epoch = Number(pre?.pause_epoch ?? 0);
+    const setState = (st: string) => db.from("contact_ai").update({ ai_state: st }).eq("phone", row.phone).eq("paused", false);
     try {
+      await setState("ANALYZING");
+      await db.from("ai_events").insert({ phone: row.phone, action: "AI_ANALYZING", actor: "IA", data: { messageId: lastIn.id } });
       let decision;
       try {
+        await setState("GENERATING");
         decision = await decideReply(row.phone, Number(cfg.context_messages) || 20);
       } catch (aiError: any) {
         const { data: info } = await db.from("business_info").select("fallback_reply").eq("id", true).maybeSingle();
@@ -241,12 +247,21 @@ async function runGlobalReplies(limit = 10) {
         decision = { intent: "Sem contexto", reply: info?.fallback_reply || "Claro! 😊 Me conta o que você gostaria de saber.", optOut: false, needsHuman: false };
       }
       const { data: still } = await db.from("contact_ai").select("paused").eq("phone", row.phone).maybeSingle();
-      if (still?.paused) continue;
+      if (still?.paused) {
+        await db.from("ai_events").insert({ phone: row.phone, action: "REPLY_CANCELLED", actor: "IA", reason: "Atendente assumiu durante a geração" });
+        continue;
+      }
+      await db.from("ai_events").insert({ phone: row.phone, action: "AI_GENERATED", actor: "IA", data: { intent: decision.intent } });
+      await setState("SENDING");
       const sent = await sendMessageIdempotent({
         phone: row.phone,
         content: decision.reply,
         idempotencyKey: `inbound-reply:${lastIn.id}`,
+        sender: "AI",
+        expectEpoch: epoch,
       });
+      await setState(decision.optOut ? "FINISHED" : "ACTIVE");
+      if (sent.blocked) continue;
       await db.from("contact_ai").update({ last_reply_at: new Date().toISOString(), paused: Boolean(decision.optOut) }).eq("phone", row.phone);
       await log("GLOBAL_REPLY_SENT", "OK", { phone: row.phone, intent: decision.intent, reply: decision.reply, providerMessageId: sent.providerMessageId, needsHuman: decision.needsHuman });
       replied += 1;
@@ -526,7 +541,12 @@ async function processExecution(execution: ExecutionRow) {
         content,
         idempotencyKey: `exec:${execution.id}:step:${step.id}`,
         executionId: execution.id,
+        sender: "AUTOMATION",
       });
+      if (sent.blocked) {
+        await db.from("automation_executions").update({ next_run_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), last_error: `Envio bloqueado: ${sent.blocked}` } as never).eq("id", execution.id);
+        return;
+      }
       if (!sent.providerMessageId) {
         throw new Error("Envio sem confirmação: o provedor não retornou o ID da mensagem");
       }

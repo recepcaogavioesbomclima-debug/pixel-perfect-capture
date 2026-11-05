@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_events: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          phone: string
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          phone: string
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          phone?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       automation_executions: {
         Row: {
           attempts: number
@@ -206,31 +236,46 @@ export type Database = {
       }
       contact_ai: {
         Row: {
+          ai_state: string
           assigned_at: string | null
           assigned_name: string | null
           assigned_to: string | null
           last_reply_at: string | null
+          pause_epoch: number
+          pause_reason: string | null
           paused: boolean
+          paused_at: string | null
+          paused_by_name: string | null
           pending_reply_at: string | null
           phone: string
           updated_at: string
         }
         Insert: {
+          ai_state?: string
           assigned_at?: string | null
           assigned_name?: string | null
           assigned_to?: string | null
           last_reply_at?: string | null
+          pause_epoch?: number
+          pause_reason?: string | null
           paused?: boolean
+          paused_at?: string | null
+          paused_by_name?: string | null
           pending_reply_at?: string | null
           phone: string
           updated_at?: string
         }
         Update: {
+          ai_state?: string
           assigned_at?: string | null
           assigned_name?: string | null
           assigned_to?: string | null
           last_reply_at?: string | null
+          pause_epoch?: number
+          pause_reason?: string | null
           paused?: boolean
+          paused_at?: string | null
+          paused_by_name?: string | null
           pending_reply_at?: string | null
           phone?: string
           updated_at?: string
@@ -602,6 +647,7 @@ export type Database = {
           idempotency_key: string | null
           phone: string
           provider_message_id: string | null
+          sender: string | null
           status: string
           type: string
         }
@@ -616,6 +662,7 @@ export type Database = {
           idempotency_key?: string | null
           phone: string
           provider_message_id?: string | null
+          sender?: string | null
           status?: string
           type?: string
         }
@@ -630,6 +677,7 @@ export type Database = {
           idempotency_key?: string | null
           phone?: string
           provider_message_id?: string | null
+          sender?: string | null
           status?: string
           type?: string
         }
@@ -1099,6 +1147,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ai_pause: {
+        Args: { _kind: string; _phone: string; _reason: string }
+        Returns: {
+          ai_state: string
+          changed: boolean
+          paused_at: string
+          paused_by_name: string
+        }[]
+      }
+      ai_reactivate: { Args: { _phone: string }; Returns: boolean }
       claim_conversation: {
         Args: { _name: string; _phone: string }
         Returns: {

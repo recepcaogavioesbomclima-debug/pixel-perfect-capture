@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { computeTrend, isHot, levelFor, smoothScore, validateAnalysis } from "@/lib/interest";
+import { computeTrend, finalScore, isHot, levelFor, smoothScore, validateAnalysis } from "@/lib/interest";
 
 describe("score de interesse", () => {
   it("niveis seguem a escala 0-20/21-40/41-60/61-80/81-100", () => {
@@ -32,6 +32,12 @@ describe("score de interesse", () => {
   it("sem motivos registra evidências insuficientes", () => {
     const a = validateAnalysis({ score: 10, intent: "INDEFINIDO", objection: "NENHUMA", reasons: [] })!;
     expect(a.reasons[0]?.text).toMatch(/insuficientes/);
+  });
+
+  it("cortesia/baixa confiança não derruba o interesse anterior", () => {
+    expect(finalScore(75, 30, "INDEFINIDO", 40)).toBe(75);
+    expect(finalScore(null, 70, "INTERESSADO", 50)).toBe(70);
+    expect(finalScore(70, 90, "QUER SE MATRICULAR", 90)).toBe(90);
   });
 
   it("desinteresse explicito pode derrubar o score; outros saltos são limitados", () => {

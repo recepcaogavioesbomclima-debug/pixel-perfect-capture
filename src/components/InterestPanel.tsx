@@ -49,6 +49,8 @@ export function InterestPanel({ phone }: { phone: string }) {
           <Field k="Tendência" v={TREND[c.trend] ?? c.trend} />
           <Field k="Objeção" v={c.objection ?? "NENHUMA"} />
           <Field k="Lead quente" v={c.hot ? "🔥 SIM" : "NÃO"} />
+          <Field k="Confiança" v={c.confidence != null ? `${c.confidence}%` : "—"} />
+          <Field k="Nível anterior" v={c.previous_level ?? "—"} />
           <Field k="Última análise" v={fmt(c.analyzed_at)} />
         </div>
         {c.last_error ? <p className="mt-3 text-xs text-destructive">Última tentativa falhou ({c.last_error}); mantido o último score válido.</p> : null}

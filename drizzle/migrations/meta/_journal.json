@@ -64,6 +64,13 @@
       "when": 1793736658068,
       "tag": "0008_interest_confidence",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793908237779,
+      "tag": "0009_ai_human_priority",
+      "breakpoints": true
     }
   ]
 }

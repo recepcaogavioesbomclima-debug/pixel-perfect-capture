@@ -100,7 +100,7 @@ export async function runReactivationWorker() {
       if(reservation.error) throw reservation.error;
       if(!reservation.data) {
         const key=`reactivation:${item.id}`;
-        await sendMessageIdempotent({phone:item.phone,content:item.message??'',idempotencyKey:key});
+        await sendMessageIdempotent({phone:item.phone,content:item.message??'',idempotencyKey:key,sender:'AUTOMATION'});
         const confirmation=await db.from('messages').select('status,provider_message_id').eq('idempotency_key',key).single();
         if(confirmation.error || !confirmedSend(confirmation.data?.status??'',confirmation.data?.provider_message_id??null)) throw new Error('Confirmação do envio não disponível');
         const now=new Date().toISOString();

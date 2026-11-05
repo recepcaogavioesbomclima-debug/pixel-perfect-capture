@@ -197,7 +197,6 @@ async function scheduleGlobalReply(phone: string, content: string) {
   const delay = Math.max(5, Number(cfg.min_interval_seconds) || 5) * 1000;
   await db.from("contact_ai").upsert({
     phone,
-    paused: false,
     pending_reply_at: new Date(Date.now() + delay).toISOString(),
     updated_at: new Date().toISOString(),
   });
@@ -231,9 +230,16 @@ async function runGlobalReplies(limit = 10) {
       .from("messages").select("id").eq("phone", row.phone).eq("direction", "IN")
       .order("created_at", { ascending: false }).limit(1).maybeSingle();
     if (!lastIn) continue;
+    const { data: pre } = await db.from("contact_ai").select("pause_epoch, paused").eq("phone", row.phone).maybeSingle();
+    if (pre?.paused) continue;
+    const epoch = Number(pre?.pause_epoch ?? 0);
+    const setState = (st: string) => db.from("contact_ai").update({ ai_state: st }).eq("phone", row.phone).eq("paused", false);
     try {
+      await setState("ANALYZING");
+      await db.from("ai_events").insert({ phone: row.phone, action: "AI_ANALYZING", actor: "IA", data: { messageId: lastIn.id } });
       let decision;
       try {
+        await setState("GENERATING");
         decision = await decideReply(row.phone, Number(cfg.context_messages) || 20);
       } catch (aiError: any) {
         const { data: info } = await db.from("business_info").select("fallback_reply").eq("id", true).maybeSingle();
@@ -241,12 +247,21 @@ async function runGlobalReplies(limit = 10) {
         decision = { intent: "Sem contexto", reply: info?.fallback_reply || "Claro! 😊 Me conta o que você gostaria de saber.", optOut: false, needsHuman: false };
       }
       const { data: still } = await db.from("contact_ai").select("paused").eq("phone", row.phone).maybeSingle();
-      if (still?.paused) continue;
+      if (still?.paused) {
+        await db.from("ai_events").insert({ phone: row.phone, action: "REPLY_CANCELLED", actor: "IA", reason: "Atendente assumiu durante a geração" });
+        continue;
+      }
+      await db.from("ai_events").insert({ phone: row.phone, action: "AI_GENERATED", actor: "IA", data: { intent: decision.intent } });
+      await setState("SENDING");
       const sent = await sendMessageIdempotent({
         phone: row.phone,
         content: decision.reply,
         idempotencyKey: `inbound-reply:${lastIn.id}`,
+        sender: "AI",
+        expectEpoch: epoch,
       });
+      await setState(decision.optOut ? "FINISHED" : "ACTIVE");
+      if (sent.blocked) continue;
       await db.from("contact_ai").update({ last_reply_at: new Date().toISOString(), paused: Boolean(decision.optOut) }).eq("phone", row.phone);
       await log("GLOBAL_REPLY_SENT", "OK", { phone: row.phone, intent: decision.intent, reply: decision.reply, providerMessageId: sent.providerMessageId, needsHuman: decision.needsHuman });
       replied += 1;
@@ -297,6 +312,8 @@ export async function runPendingReplies(limit = 10) {
 
     try {
       await log("AUTO_REPLY_ANALYSING", "RUNNING", { phone: row.phone }, row.id);
+      const { data: pre } = await (db as any).from("contact_ai").select("pause_epoch").eq("phone", row.phone).maybeSingle();
+      const epoch = Number(pre?.pause_epoch ?? 0);
       let decision;
       try {
         decision = await decideReply(row.phone);
@@ -315,7 +332,10 @@ export async function runPendingReplies(limit = 10) {
         // 1 resposta por mensagem recebida, mesmo com varias execucoes do mesmo numero
         idempotencyKey: `inbound-reply:${lastIn.id}`,
         executionId: row.id,
+        sender: "AI",
+        expectEpoch: epoch,
       });
+      if (sent.blocked) continue;
       await log("AUTO_REPLY_SENT", "OK", { intent: decision.intent, reply: decision.reply, providerMessageId: sent.providerMessageId, needsHuman: decision.needsHuman }, row.id);
       replied += 1;
       if (decision.optOut) {
@@ -363,9 +383,31 @@ export async function sendMessageIdempotent(params: {
   content: string;
   idempotencyKey: string;
   executionId?: string | null;
-}): Promise<{ skipped: boolean; providerMessageId?: string; providerResponse?: unknown }> {
+  /** AI/AUTOMATION passam pela trava de atendimento humano antes do envio. */
+  sender?: "AI" | "AUTOMATION" | "ATTENDANT";
+  expectEpoch?: number;
+}): Promise<{ skipped: boolean; blocked?: string; providerMessageId?: string; providerResponse?: unknown }> {
   const db = getDb();
   const phone = normalizePhone(params.phone);
+  const sender = params.sender ?? (params.executionId ? "AUTOMATION" : "ATTENDANT");
+  const automatic = sender !== "ATTENDANT";
+  const guard = async () => {
+    if (!automatic) return null;
+    const [{ data: c }, { data: cc }] = await Promise.all([
+      (db as any).from("contact_ai").select("paused, assigned_to, pause_epoch").eq("phone", phone).maybeSingle(),
+      (db as any).from("contact_commercial").select("opt_out").eq("phone", phone).maybeSingle(),
+    ]);
+    const { autoSendBlockReason } = await import("./ai-guard");
+    return autoSendBlockReason({ ...(c ?? {}), opt_out: cc?.opt_out }, params.expectEpoch);
+  };
+  const block = async (reason: string) => {
+    await (db as any).from("messages").update({ status: "CANCELLED", error: `Bloqueada: ${reason}` }).eq("idempotency_key", params.idempotencyKey).neq("status", "SENT");
+    await (db as any).from("ai_events").insert({ phone, action: "SEND_BLOCKED", actor: sender, reason, data: { key: params.idempotencyKey } });
+    await log("SEND_BLOCKED_HUMAN", "OK", { phone, reason, key: params.idempotencyKey }, params.executionId);
+    return { skipped: true, blocked: reason };
+  };
+  const early = await guard();
+  if (early) return block(early);
 
   const { data: existing } = await db
     .from("messages")
@@ -387,14 +429,20 @@ export async function sendMessageIdempotent(params: {
       status: "PENDING",
       idempotency_key: params.idempotencyKey,
       execution_id: params.executionId ?? null,
-    });
+      sender,
+    } as never);
     // corrida: outro worker ja inseriu a mesma chave
     if (error && !`${error.message}`.includes("duplicate")) throw error;
     if (error) return { skipped: true };
   }
 
+  // verificação final imediatamente antes do provedor
+  const late = await guard();
+  if (late) return block(late);
+
   try {
     const result = await WhatsAppProvider.sendMessage(phone, params.content);
+    if (sender === "AI") await (db as any).from("ai_events").insert({ phone, action: "AI_SENT", actor: "IA", reason: null, data: { providerMessageId: result.providerMessageId } });
     await db
       .from("messages")
       .update({
@@ -498,7 +546,12 @@ async function processExecution(execution: ExecutionRow) {
         content,
         idempotencyKey: `exec:${execution.id}:step:${step.id}`,
         executionId: execution.id,
+        sender: "AUTOMATION",
       });
+      if (sent.blocked) {
+        await db.from("automation_executions").update({ next_run_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), last_error: `Envio bloqueado: ${sent.blocked}` } as never).eq("id", execution.id);
+        return;
+      }
       if (!sent.providerMessageId) {
         throw new Error("Envio sem confirmação: o provedor não retornou o ID da mensagem");
       }
